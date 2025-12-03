@@ -1,0 +1,72 @@
+# PDF Guide
+Music_Genre_Classification_Guide.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Data files (too large for git)
+data/fma_small/
+data/*.csv
+data/processed/*.pkl
+data/*.zip
+
+# Model checkpoints (too large for git)
+checkpoints/*.h5
+checkpoints/*.keras
+checkpoints/*.ckpt
+checkpoints/*.weights.h5
+
+# Logs
+logs/*.out
+logs/*.err
+*.log
+
+# Results
+results/figures/*.png
+results/figures/*.jpg
+results/figures/gradcam/*.png
+results/tables/*.csv
+results/metrics/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Wandb
+wandb/
+
+# Temporary files
+*.tmp
+*.bak
+test_*
+
+# Keep directories but ignore contents
+!data/.gitkeep
+!checkpoints/.gitkeep
+!logs/.gitkeep
+!results/figures/.gitkeep
+!results/tables/.gitkeep
+!results/metrics/.gitkeep
+PROJECT_SUMMARY.md
+QUICKSTART.md
