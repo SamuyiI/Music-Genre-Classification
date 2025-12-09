@@ -20,8 +20,7 @@ echo ""
 
 # Load modules
 module load miniconda3/23.11.0s
-module load cuda/11.4
-module load cudnn/8.2
+module load cuda/11.8.0-lpttyok
 
 # Activate environment
 source activate csci1470

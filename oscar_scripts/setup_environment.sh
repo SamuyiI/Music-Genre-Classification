@@ -58,8 +58,7 @@ echo ""
 
 # Load CUDA modules
 echo -e "${BLUE}[4/6] Loading CUDA modules for GPU support...${NC}"
-module load cuda/11.4
-module load cudnn/8.2
+module load cuda/11.8.0-lpttyok
 echo -e "${GREEN}CUDA modules loaded :)${NC}"
 echo ""
 
@@ -134,17 +133,17 @@ echo ""
 echo -e "To use this environment in the future:"
 echo -e "  ${YELLOW}1. In interactive sessions:${NC}"
 echo -e "     module load miniconda3/23.11.0s"
-echo -e "     module load cuda/11.4 cudnn/8.2"
+echo -e "     module load cuda/11.8.0-lpttyok"
 echo -e "     conda activate ${ENV_NAME}"
 echo ""
 echo -e "  ${YELLOW}2. In SLURM batch scripts, add these lines:${NC}"
 echo -e "     module load miniconda3/23.11.0s"
-echo -e "     module load cuda/11.4 cudnn/8.2"
+echo -e "     module load cuda/11.8.0-lpttyok"
 echo -e "     source activate ${ENV_NAME}"
 echo ""
 echo -e "  ${YELLOW}3. To test GPU access (on a GPU node):${NC}"
 echo -e "     interact -g 1"
-echo -e "     module load miniconda3/23.11.0s cuda/11.4 cudnn/8.2"
+echo -e "     module load miniconda3/23.11.0s cuda/11.8.0-lpttyok"
 echo -e "     conda activate ${ENV_NAME}"
 echo -e "     python -c \"import tensorflow as tf; print('GPUs:', tf.config.list_physical_devices('GPU'))\""
 echo ""
