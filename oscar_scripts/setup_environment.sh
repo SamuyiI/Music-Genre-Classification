@@ -1,61 +1,156 @@
 #!/bin/bash
+################################################################################
+# OSCAR Environment Setup Script for Music Genre Classification
+# Run this script ONCE to set up your Python environment with all dependencies
 #
-# Environment setup script for OSCAR
-# Sets up conda environment with all necessary dependencies
-#
+# Usage: bash setup_environment.sh
+################################################################################
 
-echo "================================"
-echo "OSCAR Environment Setup"
-echo "================================"
+set -e  # Exit on any error
 
-# Load required modules
-echo "Loading modules..."
+# Color codes for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+ENV_NAME="csci1470"
+
+# Check if running on OSCAR
+if [[ ! -d "/oscar" ]]; then
+    echo -e "${RED}ERROR: This script must be run on OSCAR!${NC}"
+    exit 1
+fi
+
+# Load conda module
+echo -e "${BLUE}[1/6] Loading miniconda module...${NC}"
 module load miniconda3/23.11.0s
-module load cuda/11.4
-module load cudnn/8.2
+echo -e "${GREEN}Module loaded :)${NC}"
+echo ""
+
+# Check if environment already exists
+if conda env list | grep -q "^${ENV_NAME} "; then
+    echo -e "${YELLOW}Environment '${ENV_NAME}' already exists.${NC}"
+    read -p "Do you want to remove it and reinstall? (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}Removing existing environment...${NC}"
+        conda env remove -n ${ENV_NAME} -y
+        echo -e "${GREEN}Old environment removed :)${NC}"
+    else
+        echo -e "${YELLOW}Keeping existing environment. Exiting.${NC}"
+        exit 0
+    fi
+fi
 
 # Create conda environment
-echo "Creating conda environment 'csci1470'..."
-conda create -n csci1470 python=3.9 -y
+echo -e "${BLUE}[2/6] Creating conda environment '${ENV_NAME}' with Python 3.10...${NC}"
+conda create -n ${ENV_NAME} python=3.10 -y
+echo -e "${GREEN}Environment created :)${NC}"
+echo ""
 
 # Activate environment
-echo "Activating environment..."
-source activate csci1470
-
-# Install TensorFlow with GPU support
-echo "Installing TensorFlow..."
-conda install -c conda-forge tensorflow-gpu=2.10 -y
-
-# Install other dependencies
-echo "Installing other dependencies..."
-pip install librosa==0.10.1
-pip install soundfile==0.12.1
-pip install numpy==1.24.3
-pip install pandas==2.0.3
-pip install matplotlib==3.7.2
-pip install seaborn==0.12.2
-pip install scikit-learn==1.3.0
-pip install wandb==0.15.8
-pip install tqdm==4.66.1
-pip install audioread==3.0.0
-
-# Verify installation
+echo -e "${BLUE}[3/6] Activating environment...${NC}"
+source activate ${ENV_NAME}
+echo -e "${GREEN}Environment activated :)${NC}"
 echo ""
-echo "================================"
-echo "Verifying installation..."
-echo "================================"
 
-python -c "import tensorflow as tf; print('TensorFlow version:', tf.__version__)"
-python -c "import tensorflow as tf; print('GPU available:', tf.config.list_physical_devices('GPU'))"
-python -c "import librosa; print('Librosa version:', librosa.__version__)"
-python -c "import sklearn; print('Scikit-learn version:', sklearn.__version__)"
+# Load CUDA modules
+echo -e "${BLUE}[4/6] Loading CUDA modules for GPU support...${NC}"
+module load cuda/11.4
+module load cudnn/8.2
+echo -e "${GREEN}CUDA modules loaded :)${NC}"
+echo ""
 
+# Install packages
+echo -e "${BLUE}[5/6] Installing required packages...${NC}"
+echo "   - tensorflow (this may take a few minutes)"
+pip install --quiet tensorflow==2.15.0
+echo "   - librosa (for audio processing)"
+pip install --quiet librosa==0.10.1
+echo "   - soundfile (for audio I/O)"
+pip install --quiet soundfile==0.12.1
+echo "   - audioread (for audio format support)"
+pip install --quiet audioread==3.0.0
+echo "   - scikit-learn (for data splitting and preprocessing)"
+pip install --quiet scikit-learn==1.3.0
+echo "   - numpy"
+pip install --quiet numpy==1.24.3
+echo "   - pandas (for metadata handling)"
+pip install --quiet pandas==2.0.3
+echo "   - matplotlib (for visualization)"
+pip install --quiet matplotlib==3.7.2
+echo "   - seaborn (for visualization)"
+pip install --quiet seaborn==0.12.2
+echo "   - wandb (for experiment tracking)"
+pip install --quiet wandb==0.15.8
+echo "   - tqdm (for progress bars)"
+pip install --quiet tqdm==4.66.1
+echo -e "${GREEN}All packages installed :)${NC}"
 echo ""
-echo "================================"
-echo "Setup complete!"
-echo "================================"
+
+# Test installation
+echo -e "${BLUE}[6/6] Testing installation...${NC}"
+python << 'EOF'
+import sys
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+import librosa
+import soundfile as sf
+import sklearn
+import wandb
+import tqdm
+import matplotlib
+import seaborn
+
+print(f"Python version: {sys.version.split()[0]}")
+print(f"TensorFlow version: {tf.__version__}")
+print(f"NumPy version: {np.__version__}")
+print(f"Pandas version: {pd.__version__}")
+print(f"Librosa version: {librosa.__version__}")
+print(f"Scikit-learn version: {sklearn.__version__}")
+print(f"wandb version: {wandb.__version__}")
+print(f"tqdm version: {tqdm.__version__}")
+print(f"matplotlib version: {matplotlib.__version__}")
+print(f"seaborn version: {seaborn.__version__}")
+
+# Check GPU availability (will show 0 on login node, but that's expected)
+gpus = tf.config.list_physical_devices('GPU')
+print(f"GPUs detected on this node: {len(gpus)}")
+if len(gpus) == 0:
+    print("  (Note: You're on a login node. GPUs will be available when you submit a job)")
+EOF
+
+echo -e "${GREEN}Installation test passed :)${NC}"
 echo ""
-echo "To activate the environment, run:"
-echo "  module load miniconda3/23.11.0s cuda/11.4 cudnn/8.2"
-echo "  source activate csci1470"
+
+# Print usage instructions
+echo -e "${BLUE}========================================${NC}"
+echo -e "${GREEN}Setup Complete!${NC}"
+echo -e "${BLUE}========================================${NC}"
 echo ""
+echo -e "To use this environment in the future:"
+echo -e "  ${YELLOW}1. In interactive sessions:${NC}"
+echo -e "     module load miniconda3/23.11.0s"
+echo -e "     module load cuda/11.4 cudnn/8.2"
+echo -e "     conda activate ${ENV_NAME}"
+echo ""
+echo -e "  ${YELLOW}2. In SLURM batch scripts, add these lines:${NC}"
+echo -e "     module load miniconda3/23.11.0s"
+echo -e "     module load cuda/11.4 cudnn/8.2"
+echo -e "     source activate ${ENV_NAME}"
+echo ""
+echo -e "  ${YELLOW}3. To test GPU access (on a GPU node):${NC}"
+echo -e "     interact -g 1"
+echo -e "     module load miniconda3/23.11.0s cuda/11.4 cudnn/8.2"
+echo -e "     conda activate ${ENV_NAME}"
+echo -e "     python -c \"import tensorflow as tf; print('GPUs:', tf.config.list_physical_devices('GPU'))\""
+echo ""
+echo -e "  ${YELLOW}4. Don't forget to set your Wandb API key:${NC}"
+echo -e "     export WANDB_API_KEY='your-api-key-here'"
+echo -e "     # Or add to ~/.bashrc for persistence:"
+echo -e "     echo 'export WANDB_API_KEY=\"your-api-key-here\"' >> ~/.bashrc"
+echo ""
+echo -e "${GREEN}You're ready to train your music genre classification models!${NC}"

@@ -172,7 +172,31 @@ class AudioPreprocessor:
             print(f"Metadata file not found: {metadata_file}")
             return
 
-        metadata = pd.read_csv(metadata_file)
+        # FMA tracks.csv has a 3-level header, with track_id as index
+        metadata = pd.read_csv(metadata_file, index_col=0, header=[0, 1])
+
+        # Access the genre_top column (it's under 'track', 'genre_top')
+        # Reset index to make track_id a column
+        metadata = metadata.reset_index()
+        metadata.columns = ['_'.join(col).strip('_') if col[1] else col[0] for col in metadata.columns.values]
+
+        # Get list of available track IDs from the audio directory
+        available_tracks = set()
+        for root, dirs, files in os.walk(audio_dir):
+            for file in files:
+                if file.endswith('.mp3'):
+                    track_id = int(file.replace('.mp3', ''))
+                    available_tracks.add(track_id)
+
+        print(f"Found {len(available_tracks)} audio files in {audio_dir}")
+
+        # Filter metadata to only include available tracks
+        metadata = metadata[metadata['track_id'].isin(available_tracks)]
+
+        # Remove rows with missing genre_top
+        metadata = metadata[metadata['track_genre_top'].notna()]
+
+        print(f"Found {len(metadata)} tracks with metadata and genre labels")
 
         # Limit samples if specified
         if max_samples:
@@ -187,11 +211,11 @@ class AudioPreprocessor:
 
         # Process each file
         for idx, row in tqdm(metadata.iterrows(), total=len(metadata)):
-            file_id = row['track_id']
-            genre = row['genre_top']
+            file_id = row['track_id'] if 'track_id' in row else row['index']
+            genre = row['track_genre_top']
 
-            # Construct file path (adjust based on FMA structure)
-            file_path = os.path.join(audio_dir, f"{file_id:06d}.mp3")
+            # Construct file path (FMA structure: data/fma_small/NNN/NNNNNN.mp3)
+            file_path = os.path.join(audio_dir, f"{file_id:06d}"[:3], f"{file_id:06d}.mp3")
 
             if not os.path.exists(file_path):
                 print(f"File not found: {file_path}")
@@ -260,15 +284,14 @@ def main():
 
     # Test on small subset first
     audio_dir = "data/fma_small"
-    metadata_file = "data/fma_metadata.csv"
+    metadata_file = "data/fma_metadata/tracks.csv"
     output_dir = "data/processed"
 
-    # Process dataset (use max_samples for testing)
+    # Process full dataset
     preprocessor.process_dataset(
         audio_dir=audio_dir,
         metadata_file=metadata_file,
-        output_dir=output_dir,
-        max_samples=20  # Test with 20 samples first
+        output_dir=output_dir
     )
 
 
