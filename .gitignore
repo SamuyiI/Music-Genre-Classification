@@ -17,6 +17,7 @@ dist/
 # Data files (too large for git)
 data/fma_small/
 data/*.csv
+data/fma_metadata/
 data/processed/*.pkl
 data/*.zip
 
