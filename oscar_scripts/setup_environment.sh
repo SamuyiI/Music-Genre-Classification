@@ -82,6 +82,8 @@ echo "   - matplotlib (for visualization)"
 pip install --quiet matplotlib==3.7.2
 echo "   - seaborn (for visualization)"
 pip install --quiet seaborn==0.12.2
+echo "   - wandb dependencies"
+pip install --quiet click pyyaml platformdirs
 echo "   - wandb (for experiment tracking)"
 pip install --quiet wandb==0.15.8
 echo "   - tqdm (for progress bars)"

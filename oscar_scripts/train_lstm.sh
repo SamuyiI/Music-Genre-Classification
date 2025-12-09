@@ -23,8 +23,11 @@ echo ""
 # Load modules
 module load miniconda3/23.11.0s
 
+# Initialize conda for bash shell
+eval "$(conda shell.bash hook)"
+
 # Activate environment
-source activate csci1470
+conda activate csci1470
 
 # Set environment variables
 export WANDB_API_KEY=${WANDB_API_KEY}
